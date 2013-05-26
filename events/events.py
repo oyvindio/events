@@ -13,6 +13,8 @@
     :license: BSD, see LICENSE for more details.
 """
 
+from multiprocessing import Process
+
 
 class EventsException(Exception):
     pass
@@ -70,7 +72,8 @@ class _EventSlot:
 
     def __call__(self, *a, **kw):
         for f in self.targets:
-            f(*a, **kw)
+            process = Process(target=f, args=a, kwargs=kw)
+            process.start()
 
     def __iadd__(self, f):
         self.targets.append(f)

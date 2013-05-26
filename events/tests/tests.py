@@ -98,3 +98,21 @@ class TestEventSlot(TestBase):
         self.assertEqual(len(ev), 2)
         self.assertEqual(ev[0].__name__, 'callback2')
         self.assertEqual(ev[1].__name__, 'callback3')
+
+    def test_targets_should_not_block(self):
+        import time
+        sleeptime = 1
+        callbacks = 10
+
+        def slow_callback():
+            time.sleep(sleeptime)
+
+        for callback in [slow_callback] * callbacks:
+            self.events.ping += callback
+
+        before = time.time()
+        self.events.ping()
+        after = time.time()
+
+        self.assertTrue(after - before < callbacks * sleeptime,
+                        "calling all targets took longer than expected")
